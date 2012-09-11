@@ -174,6 +174,15 @@ _austin_devices_init(void)
 	for (i = 0; i < ARRAY_SIZE(_pad_setup); i++)
 		imx_gpio_mode(_pad_setup[i]);
 
+#ifdef CONFIG_NAND
+	add_generic_device("mxs_nand", 0, NULL, MXS_GPMI_BASE, 0, IORESOURCE_MEM, NULL);
+
+	devfs_add_partition("nand0", 0x00000, O_BAREBOX_SIZE, DEVFS_PARTITION_FIXED, "self_raw");
+	dev_add_bb_dev("self_raw", "self0");
+	devfs_add_partition("nand0", O_BAREBOX_SIZE, O_BAREBOX_ENV_SIZE, DEVFS_PARTITION_FIXED, "env_raw");
+	dev_add_bb_dev("env_raw", "env0");
+#endif
+
 	armlinux_set_bootparams((void *)IMX_MEMORY_BASE + 0x100);
 	armlinux_set_architecture(MACH_TYPE_AUSTIN_MX23);
 
