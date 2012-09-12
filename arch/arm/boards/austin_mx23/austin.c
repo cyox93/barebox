@@ -39,6 +39,8 @@
 #include <mach/mci.h>
 #include <mach/fb.h>
 #include <mach/usb.h>
+#include <usb/fsl_usb2.h>
+
 
 /*_____________________ Constants Definitions _______________________________*/
 
@@ -155,6 +157,13 @@ static const uint32_t _pad_setup[] = {
 	EMI_CE1N_GPIO | GPIO_IN | PULLUP(1),
 };
 
+#ifdef CONFIG_USB_GADGET
+static struct fsl_usb2_platform_data _usb_pdata = {
+	.operating_mode	= FSL_USB2_DR_DEVICE,
+	.phy_mode	= FSL_USB2_PHY_UTMI,
+};
+#endif
+
 /*_____________________ Program Body ________________________________________*/
 static int
 _austin_mem_init(void)
@@ -181,6 +190,11 @@ _austin_devices_init(void)
 	dev_add_bb_dev("self_raw", "self0");
 	devfs_add_partition("nand0", O_BAREBOX_SIZE, O_BAREBOX_ENV_SIZE, DEVFS_PARTITION_FIXED, "env_raw");
 	dev_add_bb_dev("env_raw", "env0");
+#endif
+
+#ifdef CONFIG_USB_GADGET
+	add_generic_device("fsl-udc", -1, NULL, IMX_USB_BASE, 0x200,
+			   IORESOURCE_MEM, &_usb_pdata);
 #endif
 
 	armlinux_set_bootparams((void *)IMX_MEMORY_BASE + 0x100);
